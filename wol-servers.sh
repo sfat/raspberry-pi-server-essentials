@@ -37,7 +37,6 @@ PING="/bin/ping -q -c1"
 ### functions
 
 function wake_up() {
-  echo ${MACADDRS[@]}
   echo wakeonlan ${MACADDRS[${HOSTNUM}]}
   echo wakeonlan -p 9 ${MACADDRS[${HOSTNUM}]}
   echo sudo etherwake ${MACADDRS[${HOSTNUM}]}
