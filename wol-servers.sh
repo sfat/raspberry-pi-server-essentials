@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Script to wake up servers on a scheduled basis using WoL (Wake on Lan) to power on servers in the morning, 
+# Script to wake up servers on a scheduled basis using WoL (Wake on Lan) to power on servers in the morning,
 # while the servers themselves have a cron task that shutdown themselves at midnight (5 minutes after midnight to be more precise)
 #
 # Servers from the homelab are not running 24/7, so from a cost/power point of view.
@@ -33,11 +33,11 @@ mapfile -d '' MACADDRS <"$2"
 HOSTNUM=0
 HOSTSDOWN=0
 PING="/bin/ping -q -c1"
-WAITTIME=10
 
 ### functions
 
 function wake_up() {
+  echo ${MACADDRS[@]}
   echo wakeonlan ${MACADDRS[${HOSTNUM}]}
   echo wakeonlan -p 9 ${MACADDRS[${HOSTNUM}]}
   echo sudo etherwake ${MACADDRS[${HOSTNUM}]}
@@ -71,12 +71,12 @@ for HOST in ${HOSTS[*]}; do
     HOSTNUM=$(($HOSTNUM+1))
   else
     echo "${HOST} was up at $(date)"
+    HOSTNUM=$(($HOSTNUM+1))
   fi
 done
 
 # reboot
-if [[ ${HOSTSDOWN} -eq ${#HOSTS[@]} ]]
-  then
+if [ ${HOSTSDOWN} -eq ${#HOSTS[@]} ]; then
   echo "Pi is rebooting"
+  /sbin/shutdown -r now
 fi
-/sbin/shutdown -r now
