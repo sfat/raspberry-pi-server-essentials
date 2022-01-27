@@ -7,12 +7,15 @@
 # this runs once a day
 # run
 # crontab -e
-# 0 9 * * * bash /home/pi/wol-servers.sh \
+# 0 9 * * * bash /home/pi/raspberry-pi-server-essentials/wol-servers.sh \
 #                                        <( (( ${#SERVER_HOSTS[@]} )) && printf '%s\0' "${SERVER_HOSTS[@]}") \
 #                                        <( (( ${#SERVER_MACADDRS[@]} )) && printf '%s\0' "${SERVER_MACADDRS[@]}") > wol-servers.log
 # e.g:
-# SERVER_HOSTS=(192.168.0.1 192.168.0.2 192.168.0.3)
-# SERVER_MACADDRS=(mac.address.1 mac.address.2 mac.address.3)
+# export SERVER_HOSTS=(192.168.0.1 192.168.0.2 192.168.0.3)
+# export SERVER_MACADDRS=(mac.address.1 mac.address.2 mac.address.3)
+#
+# You can set these env variables in `~/.bashrc` or `~/.bash_profile`
+# Make sure to set the variables as root and also to edit the crontab for root because of some commands that require sudo access
 #
 # requires etherwake and wakeonlan (apt-get) - this script will try to install them if they do not exist
 # installed etherwake and wakeonlan beacuse I had some issues with one or the other between updates, so I added both
