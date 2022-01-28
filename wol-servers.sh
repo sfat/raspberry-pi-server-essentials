@@ -38,9 +38,9 @@ PING="/bin/ping -q -c1"
 ### functions
 
 function wake_up() {
-  echo wakeonlan ${MACADDRS[${HOSTNUM}]}
-  echo wakeonlan -p 9 ${MACADDRS[${HOSTNUM}]}
-  echo sudo etherwake ${MACADDRS[${HOSTNUM}]}
+  wakeonlan ${MACADDRS[${HOSTNUM}]}
+  wakeonlan -p 9 ${MACADDRS[${HOSTNUM}]}
+  sudo etherwake ${MACADDRS[${HOSTNUM}]}
 }
 
 # first sleep to allow system to connect to network and time to break out if needed
