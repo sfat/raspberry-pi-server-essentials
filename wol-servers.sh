@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 #
 # Script to wake up servers on a scheduled basis using WoL (Wake on Lan) to power on servers in the morning,
 # while the servers themselves have a cron task that shutdown themselves at midnight (5 minutes after midnight to be more precise)
@@ -7,12 +7,17 @@
 # this runs once a day
 # run
 # crontab -e
-# 0 9 * * * bash /home/pi/raspberry-pi-server-essentials/wol-servers.sh <( (( ${#SERVER_HOSTS[@]} )) && printf '\%s\0' "${SERVER_HOSTS[@]}") <( (( ${#SERVER_MACADDRS[@]} )) && printf '\%s\0' "${SERVER_MACADDRS[@]}") >> wol-servers.log
-# e.g:
-# export SERVER_HOSTS=(192.168.0.1 192.168.0.2 192.168.0.3)
-# export SERVER_MACADDRS=(mac.address.1 mac.address.2 mac.address.3)
+# 0 9 * * * . /root/.bashrc; bash /home/pi/raspberry-pi-server-essentials/wol-servers.sh -s $SERVER_HOSTS -m $SERVER_MACADDRS >> /var/log/wol-servers.log 2>&1
+# where -s represents the server ips and the -m represents the server mac addresses (used by the WoL utilities)
 #
-# You can set these env variables in `~/.bashrc` or `~/.bash_profile`
+# e.g:
+# in /root/.bashrc
+# export SERVER_HOSTS="192.168.0.1 192.168.0.2 192.168.0.3"
+# export SERVER_MACADDRS="mac.address.1 mac.address.2 mac.address.3"
+#
+# Note: when setting SERVER_HOSTS and SERVER_MACADDRS variables, order matters. each ip address corresponds to the same position in the mac address variable
+# 
+# You can set these env variables in `/root/.bashrc`
 # Make sure to set the variables as root and also to edit the crontab for root because of some commands that require sudo access
 #
 # requires etherwake and wakeonlan (apt-get) - this script will try to install them if they do not exist
@@ -27,9 +32,28 @@ if [ "" = "$PKG_OK" ]; then
   sudo apt-get --yes install $REQUIRED_PKG
 fi
 
-# bash 4.4 or newer
-mapfile -d '' HOSTS <"$1"
-mapfile -d '' MACADDRS <"$2"
+function getopts-extra () {
+    declare i=1
+    # if the next argument is not an option, then append it to array OPTARG
+    while [[ ${OPTIND} -le $# && ${!OPTIND:0:1} != '-' ]]; do
+        OPTARG[i]=${!OPTIND}
+        let i++ OPTIND++
+    done
+}
+
+while getopts ":s:m:" opt; do
+    case $opt in
+        s) getopts-extra "$@"
+           HOSTS=( "${OPTARG[@]}" )
+	   ;;
+        m) getopts-extra "$@"
+           MACADDRS=( "${OPTARG[@]}" )
+	   ;;
+    esac
+done
+
+echo "hosts: ${HOSTS[@]}"
+echo "mac addresses: ${MACADDRS[@]}"
 
 HOSTNUM=0
 HOSTSDOWN=0
